@@ -1,0 +1,50 @@
+[
+  {
+    "id": "trade_20260525_222918",
+    "timestamp": "2026-05-25T22:29:18.222529+00:00",
+    "symbol": "MSFT",
+    "action": "buy",
+    "price": 420.0,
+    "strategy": "Supertrend",
+    "timeframe": "D",
+    "sentiment_score": 0.0,
+    "sentiment_label": "neutral",
+    "sentiment_summary": "Could not fetch sentiment for MSFT. Defaulting to neutral.",
+    "order_status": "dry_run",
+    "order_id": "dry-run-no-order",
+    "notional": 500.0,
+    "success": true
+  },
+  {
+    "id": "trade_20260525_224241",
+    "timestamp": "2026-05-25T22:42:41.105730+00:00",
+    "symbol": "MSFT",
+    "action": "buy",
+    "price": 420.0,
+    "strategy": "Supertrend",
+    "timeframe": "D",
+    "sentiment_score": 0.0,
+    "sentiment_label": "neutral",
+    "sentiment_summary": "Could not fetch sentiment for MSFT. Defaulting to neutral.",
+    "order_status": "dry_run",
+    "order_id": "dry-run-no-order",
+    "notional": 500.0,
+    "success": true
+  },
+  {
+    "id": "trade_20260525_224512",
+    "timestamp": "2026-05-25T22:45:12.818727+00:00",
+    "symbol": "MSFT",
+    "action": "buy",
+    "price": 420.0,
+    "strategy": "Supertrend",
+    "timeframe": "D",
+    "sentiment_score": 0.0,
+    "sentiment_label": "neutral",
+    "sentiment_summary": "Could not fetch sentiment for MSFT. Defaulting to neutral.",
+    "order_status": "dry_run",
+    "order_id": "dry-run-no-order",
+    "notional": 500.0,
+    "success": true
+  }
+]

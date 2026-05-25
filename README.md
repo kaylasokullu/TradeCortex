@@ -1,14 +1,77 @@
-# TradeCortex
-TradeCortex is an AI trading system that automates the full pipeline from TradingView signals all the way to live execution via Alpaca. It is coordinated by intelligent agents and monitored through a real-time React dashboard.
+# MSFT AI Trading Bot
 
+TradingView Supertrend alerts → AI Orchestrator (Claude) → Alpaca paper account
 
-Strategy picked: 
-1. Supertrend (ATR 10, multiplier 3) — **TRENDING markets**
+## Architecture
 
-The Supertrend, developed by Olivier Seban, is the cleanest mechanical trend-follower available. It plots a single line that flips above/below price based on ATR.
+```
+TradingView (Pine Script Alert)
+        ↓  POST /webhook
+main.py (FastAPI server)
+        ↓
+core/orchestrator.py (Brain)
+        ├── agents/sentiment_agent.py  (Claude + web search)
+        ├── agents/broker_agent.py     (Alpaca paper orders)
+        ├── agents/reporting_agent.py  (trades.json log)
+        └── agents/notification_agent.py (Slack)
+```
 
-- **Buy rule:** Daily close > Supertrend line AND Supertrend line flips from above price to below price on the current bar (color flip from red to green). Optionally require ADX(14) > 25 for confirmation.
-- **Sell rule:** Daily close < Supertrend line (line flips from below to above, green → red). Used as both exit-long and enter-short.
-- **NVDA notes:** TrendSpider and FBS both recommend **ATR period 10–14, multiplier 3–4 for swing trading**; for NVDA specifically, use **multiplier 3.5–4** because the standard 3 gets whipsawed during AI-news days. The line itself doubles as a trailing stop.
-- **Pine-Script implementation tip:** `ta.supertrend(factor, atrPeriod)` is built into Pine v5 — one line of code.
+## Setup
 
+```bash
+# 1. Install dependencies
+pip install -r requirements.txt
+
+# 2. Configure environment
+cp .env.example .env
+# Edit .env with your real keys
+
+# 3. Run the server
+python main.py
+
+# 4. Expose publicly (for TradingView to reach)
+# Using ngrok for dev:
+ngrok http 8000
+# Copy the https URL → paste into TradingView alert webhook field
+```
+
+## TradingView Alert Message
+
+Paste this JSON into your TradingView alert "Message" field:
+
+```json
+{
+  "secret":    "your-webhook-secret",
+  "action":    "{{strategy.order.action}}",
+  "symbol":    "{{ticker}}",
+  "price":     {{close}},
+  "strategy":  "Supertrend",
+  "timeframe": "{{interval}}",
+  "timestamp": "{{time}}"
+}
+```
+
+## Test the Webhook Manually
+
+```bash
+curl -X POST http://localhost:8000/webhook \
+  -H "Content-Type: application/json" \
+  -d '{
+    "secret": "change-me-to-something-random-and-long",
+    "action": "buy",
+    "symbol": "MSFT",
+    "price": 420.50,
+    "strategy": "Supertrend",
+    "timeframe": "D",
+    "timestamp": "2026-05-25T14:30:00Z"
+  }'
+```
+
+## Safety Checklist Before Going Live
+
+- [ ] `DRY_RUN=false` only when fully tested
+- [ ] Paper trade for at least 30 days first
+- [ ] Whitelist TradingView IPs in `main.py` (see comments)
+- [ ] Change `WEBHOOK_SECRET` to something long and random
+- [ ] Never commit `.env` to git
+- [ ] Monitor `trades.json` after every signal
