@@ -26,16 +26,16 @@ class TradingViewAlert(BaseModel):
     action: Literal["buy", "sell"]
     symbol: str
     price: float
-    strategy: Optional[str] = "Supertrend"
+    strategy: Optional[str] = "RSI2_Pullback"
     timeframe: Optional[str] = "D"
     timestamp: Optional[str] = None
 
     @field_validator("symbol")
     @classmethod
-    def symbol_must_be_msft(cls, v):
-        """Safety guard — only process MSFT signals during development."""
-        if v.upper() != "MSFT":
-            raise ValueError(f"Unexpected symbol: {v}. Only MSFT is configured.")
+    def symbol_must_be_gev(cls, v):
+        """Safety guard — only process GEV signals during development."""
+        if v.upper() != "GEV":
+            raise ValueError(f"Unexpected symbol: {v}. Only GEV is configured.")
         return v.upper()
 
     @field_validator("price")

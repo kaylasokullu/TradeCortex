@@ -1,5 +1,5 @@
 """
-MSFT AI Trading Bot — Webhook Server
+GEV AI Trading Bot — Webhook Server
 Entry point: receives TradingView alerts and routes to orchestrator.
 """
 
@@ -26,13 +26,13 @@ logger = logging.getLogger("webhook")
 # ── App lifecycle ─────────────────────────────────────────────────────────────
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    logger.info("🚀 MSFT Trading Bot starting up...")
+    logger.info("🚀 GEV Trading Bot starting up...")
     app.state.orchestrator = Orchestrator()
     yield
     logger.info("🛑 Shutting down...")
 
 app = FastAPI(
-    title="MSFT Trading Bot",
+    title="GEV Trading Bot",
     description="TradingView webhook → AI Orchestrator → Alpaca",
     version="1.0.0",
     lifespan=lifespan,
@@ -83,7 +83,7 @@ async def verify_webhook(request: Request) -> dict:
 @app.get("/health")
 async def health_check():
     """Simple health check — use this to verify your server is reachable."""
-    return {"status": "ok", "symbol": "MSFT", "version": "1.0.0"}
+    return {"status": "ok", "symbol": "GEV", "version": "1.0.0"}
 
 
 @app.post("/webhook", response_model=WebhookResponse)

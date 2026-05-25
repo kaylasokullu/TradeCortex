@@ -21,7 +21,7 @@ class Settings(BaseSettings):
     GEMINI_API_KEY: str = ""      # Optional fallback
 
     # ── Trading Config ────────────────────────────────────────────────────────
-    SYMBOL: str = "MSFT"
+    SYMBOL: str = "GEV"
     ORDER_NOTIONAL: float = 500.0   # $ amount per trade (fractional shares)
     DRY_RUN: bool = True            # True = log only, no real orders
 
