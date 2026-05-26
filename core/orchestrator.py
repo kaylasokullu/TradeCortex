@@ -27,7 +27,7 @@ class Orchestrator:
         self.broker = BrokerAgent()
         self.reporting = ReportingAgent()
         self.notification = NotificationAgent()
-        logger.info("🧠 Orchestrator initialized with all agents")
+        logger.info("🧠 Orchestrator initialized with all agents ")
 
     async def process(self, alert: TradingViewAlert) -> dict[str, Any]:
         """
