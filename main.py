@@ -5,8 +5,10 @@ Entry point: receives TradingView alerts and routes to orchestrator.
 
 import hmac
 import hashlib
+import json
 import logging
 from contextlib import asynccontextmanager
+from pathlib import Path
 
 from fastapi import FastAPI, Request, HTTPException, Depends
 from fastapi.middleware.cors import CORSMiddleware
@@ -84,6 +86,15 @@ async def verify_webhook(request: Request) -> dict:
 async def health_check():
     """Simple health check — use this to verify your server is reachable."""
     return {"status": "ok", "symbol": "GEV", "version": "1.0.0"}
+
+
+@app.get("/trades")
+async def get_trades():
+    """Returns all logged trades — used by the React dashboard."""
+    trades_path = Path("trades.json")
+    if not trades_path.exists():
+        return []
+    return json.loads(trades_path.read_text())
 
 
 @app.post("/webhook", response_model=WebhookResponse)

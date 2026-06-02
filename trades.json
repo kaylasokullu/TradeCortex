@@ -126,5 +126,21 @@
     "order_id": "dry-run-no-order",
     "notional": 500.0,
     "success": true
+  },
+  {
+    "id": "trade_20260602_040629",
+    "timestamp": "2026-06-02T04:06:29.138488+00:00",
+    "symbol": "GEV",
+    "action": "buy",
+    "price": 380.0,
+    "strategy": "RSI2_Pullback",
+    "timeframe": "D",
+    "sentiment_score": -0.3,
+    "sentiment_label": "negative",
+    "sentiment_summary": "GEV sentiment is mildly negative in the last 24 hours, dominated by a court ruling forcing GE Vernova to continue costly Vineyard Wind turbine work against its will, compounded by institutional trimming of positions and a recent bearish analyst valuation note, partially offset by the company's strong AI power demand narrative.",
+    "order_status": "dry_run",
+    "order_id": "dry-run-no-order",
+    "notional": 500.0,
+    "success": true
   }
 ]
