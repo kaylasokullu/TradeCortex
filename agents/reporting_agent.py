@@ -5,6 +5,7 @@ Later: this feeds your React dashboard.
 
 import json
 import logging
+import os
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -12,7 +13,7 @@ from core.models import TradingViewAlert
 
 logger = logging.getLogger("reporting_agent")
 
-TRADE_LOG_PATH = Path("trades.json")
+TRADE_LOG_PATH = Path(os.getenv("TRADE_LOG_PATH", "trades.json"))
 
 
 class ReportingAgent:

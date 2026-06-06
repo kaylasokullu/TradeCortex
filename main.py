@@ -91,7 +91,8 @@ async def health_check():
 @app.get("/trades")
 async def get_trades():
     """Returns all logged trades — used by the React dashboard."""
-    trades_path = Path("trades.json")
+    import os
+    trades_path = Path(os.getenv("TRADE_LOG_PATH", "trades.json"))
     if not trades_path.exists():
         return []
     return json.loads(trades_path.read_text())
@@ -142,6 +143,6 @@ if __name__ == "__main__":
         "main:app",
         host="0.0.0.0",
         port=8000,
-        reload=True,   # set False in production
+        reload=False,
         log_level="info",
     )
