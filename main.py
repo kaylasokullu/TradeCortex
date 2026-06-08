@@ -145,10 +145,11 @@ async def get_market_data():
     symbol = cfg.get("symbol", "GEV")
 
     if not settings.ALPACA_API_KEY or not settings.ALPACA_SECRET_KEY:
+        logger.warning("Market data: no Alpaca credentials set")
         return {"symbol": symbol, "bars": []}
 
     try:
-        from alpaca.data import StockHistoricalDataClient
+        from alpaca.data.historical import StockHistoricalDataClient
         from alpaca.data.requests import StockBarsRequest
         from alpaca.data.timeframe import TimeFrame
         from datetime import datetime, timedelta, timezone
@@ -163,8 +164,14 @@ async def get_market_data():
             start=datetime.now(timezone.utc) - timedelta(days=90),
         )
         bars_response = client.get_stock_bars(request)
-        bar_list = bars_response.get(symbol, [])
 
+        # BarSet behaves like a dict — access by symbol key
+        try:
+            bar_list = bars_response[symbol]
+        except (KeyError, TypeError):
+            bar_list = []
+
+        logger.info(f"📈 Market data: {len(bar_list)} bars for {symbol}")
         return {
             "symbol": symbol,
             "bars": [
@@ -180,7 +187,7 @@ async def get_market_data():
             ],
         }
     except Exception as e:
-        logger.error(f"Market data fetch failed: {e}")
+        logger.error(f"Market data fetch failed: {type(e).__name__}: {e}")
         return {"symbol": symbol, "bars": []}
 
 

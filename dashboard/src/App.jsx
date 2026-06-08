@@ -205,7 +205,7 @@ function DashboardPage({ trades, loading, error, lastUpdated, onRefresh }) {
             <div className="chart-empty"><div className="spinner" /></div>
           ) : mkt.bars.length === 0 ? (
             <div className="chart-empty">
-              <p>No price data — Alpaca API keys required</p>
+              <p>Price data unavailable</p>
             </div>
           ) : (
             <ResponsiveContainer width="100%" height={240}>
