@@ -1,5 +1,10 @@
 import { useState, useEffect } from "react";
 import "./App.css";
+import {
+  LineChart, Line, AreaChart, Area, BarChart, Bar,
+  XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid,
+  ReferenceDot, Cell,
+} from "recharts";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
 
@@ -28,6 +33,23 @@ function calcPnL(trades) {
   return { total, closed, winRate: closed.length > 0 ? Math.round((wins / closed.length) * 100) : null };
 }
 
+// Build cumulative P&L series for the area chart
+function buildPnLSeries(trades) {
+  const sorted = [...trades].sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+  const series = [{ label: "Start", pnl: 0 }];
+  const q = [];
+  let cum = 0;
+  for (const t of sorted) {
+    if (t.action === "buy") { q.push(t); }
+    else if (t.action === "sell" && q.length > 0) {
+      const b = q.shift();
+      cum += (t.price - b.price) * (b.notional / b.price);
+      series.push({ label: t.timestamp.slice(5, 10), pnl: Math.round(cum * 100) / 100 });
+    }
+  }
+  return series;
+}
+
 function fmtDate(iso) {
   return new Date(iso).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
 }
@@ -49,8 +71,34 @@ function ModeBadge({ status }) {
   return <span className={`pill ${live ? "pill-live" : "pill-sim"}`}>{live ? "Executed" : "Simulated"}</span>;
 }
 
+// ── Custom tooltip for charts ─────────────────────────────────────────────────
+function ChartTip({ active, payload, label, prefix = "", suffix = "" }) {
+  if (!active || !payload?.length) return null;
+  return (
+    <div className="chart-tip">
+      <p className="chart-tip-label">{label}</p>
+      {payload.map((p) => (
+        <p key={p.name} style={{ color: p.color || "#111" }}>
+          {prefix}{typeof p.value === "number" ? p.value.toFixed(2) : p.value}{suffix}
+        </p>
+      ))}
+    </div>
+  );
+}
+
 // ── Dashboard ─────────────────────────────────────────────────────────────────
 function DashboardPage({ trades, loading, error, lastUpdated, onRefresh }) {
+  const [mkt, setMkt] = useState({ bars: [], symbol: "" });
+  const [mktLoading, setMktLoading] = useState(true);
+
+  useEffect(() => {
+    fetch(`${API_URL}/market-data`)
+      .then((r) => r.ok ? r.json() : { bars: [] })
+      .then((d) => setMkt(d))
+      .catch(() => {})
+      .finally(() => setMktLoading(false));
+  }, []);
+
   const buys = trades.filter((t) => t.action === "buy");
   const sells = trades.filter((t) => t.action === "sell");
   const { total, closed, winRate } = calcPnL(trades);
@@ -58,6 +106,23 @@ function DashboardPage({ trades, loading, error, lastUpdated, onRefresh }) {
     trades.length > 0
       ? trades.reduce((s, t) => s + (t.sentiment_score ?? 0), 0) / trades.length
       : null;
+
+  const pnlSeries = buildPnLSeries(trades);
+  const finalPnL = pnlSeries[pnlSeries.length - 1]?.pnl ?? 0;
+
+  const sentimentSeries = [...trades]
+    .sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp))
+    .map((t) => ({
+      label: t.timestamp.slice(5, 10),
+      score: t.sentiment_score ?? 0,
+      action: t.action,
+    }));
+
+  // Map trades to their nearest price bar date for markers
+  const tradeDates = trades.reduce((acc, t) => {
+    acc[t.id] = t.timestamp.slice(0, 10);
+    return acc;
+  }, {});
 
   return (
     <div className="page">
@@ -113,6 +178,140 @@ function DashboardPage({ trades, loading, error, lastUpdated, onRefresh }) {
           <p className="dp-sub">
             {avgSent == null ? "No data" : avgSent > 0.3 ? "Broadly positive" : avgSent < -0.3 ? "Broadly negative" : "Mixed / neutral"}
           </p>
+        </div>
+      </div>
+
+      {/* ── Charts ── */}
+      <div className="charts-area">
+
+        {/* 1. GEV Price with trade markers */}
+        <div className="chart-card chart-card-full">
+          <div className="chart-header">
+            <div>
+              <p className="chart-title">{mkt.symbol || "GEV"} Price — 90 Days</p>
+              <p className="chart-sub">
+                <span className="legend-dot" style={{ background: "#15803d" }} /> Buy entry &nbsp;
+                <span className="legend-dot" style={{ background: "#b91c1c" }} /> Sell exit
+              </p>
+            </div>
+            {mkt.bars.length > 0 && (
+              <p className="chart-current">
+                ${mkt.bars[mkt.bars.length - 1]?.close?.toFixed(2)}
+                <span className="chart-current-label"> current</span>
+              </p>
+            )}
+          </div>
+          {mktLoading ? (
+            <div className="chart-empty"><div className="spinner" /></div>
+          ) : mkt.bars.length === 0 ? (
+            <div className="chart-empty">
+              <p>No price data — Alpaca API keys required</p>
+            </div>
+          ) : (
+            <ResponsiveContainer width="100%" height={240}>
+              <LineChart data={mkt.bars} margin={{ top: 8, right: 16, left: 0, bottom: 0 }}>
+                <CartesianGrid stroke="#f0f0ee" strokeDasharray="4 4" />
+                <XAxis
+                  dataKey="date"
+                  tick={{ fontSize: 10, fill: "#bbb" }}
+                  tickFormatter={(d) => d.slice(5)}
+                  interval={Math.floor(mkt.bars.length / 6)}
+                />
+                <YAxis
+                  domain={["auto", "auto"]}
+                  tick={{ fontSize: 10, fill: "#bbb" }}
+                  width={58}
+                  tickFormatter={(v) => `$${v}`}
+                />
+                <Tooltip content={<ChartTip prefix="$" />} />
+                <Line type="monotone" dataKey="close" stroke="#111" strokeWidth={1.5} dot={false} name="Price" />
+                {buys.map((t) => {
+                  const d = tradeDates[t.id];
+                  const bar = mkt.bars.find((b) => b.date === d);
+                  return bar ? (
+                    <ReferenceDot key={t.id} x={d} y={bar.close} r={5} fill="#15803d" stroke="#fff" strokeWidth={1.5} />
+                  ) : null;
+                })}
+                {sells.map((t) => {
+                  const d = tradeDates[t.id];
+                  const bar = mkt.bars.find((b) => b.date === d);
+                  return bar ? (
+                    <ReferenceDot key={t.id} x={d} y={bar.close} r={5} fill="#b91c1c" stroke="#fff" strokeWidth={1.5} />
+                  ) : null;
+                })}
+              </LineChart>
+            </ResponsiveContainer>
+          )}
+        </div>
+
+        <div className="charts-row">
+          {/* 2. Cumulative P&L */}
+          <div className="chart-card">
+            <div className="chart-header">
+              <div>
+                <p className="chart-title">Cumulative P&amp;L</p>
+                <p className="chart-sub">Running paper profit / loss</p>
+              </div>
+              {pnlSeries.length > 1 && (
+                <p className="chart-current" style={{ color: finalPnL >= 0 ? "#15803d" : "#b91c1c" }}>
+                  {finalPnL >= 0 ? "+" : ""}${finalPnL.toFixed(0)}
+                </p>
+              )}
+            </div>
+            {pnlSeries.length <= 1 ? (
+              <div className="chart-empty"><p>No closed trades yet</p></div>
+            ) : (
+              <ResponsiveContainer width="100%" height={180}>
+                <AreaChart data={pnlSeries} margin={{ top: 8, right: 16, left: 0, bottom: 0 }}>
+                  <defs>
+                    <linearGradient id="pnlGrad" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor={finalPnL >= 0 ? "#15803d" : "#b91c1c"} stopOpacity={0.15} />
+                      <stop offset="95%" stopColor={finalPnL >= 0 ? "#15803d" : "#b91c1c"} stopOpacity={0} />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid stroke="#f0f0ee" strokeDasharray="4 4" />
+                  <XAxis dataKey="label" tick={{ fontSize: 10, fill: "#bbb" }} />
+                  <YAxis tick={{ fontSize: 10, fill: "#bbb" }} width={52} tickFormatter={(v) => `$${v}`} />
+                  <Tooltip content={<ChartTip prefix="$" />} />
+                  <Area
+                    type="monotone"
+                    dataKey="pnl"
+                    stroke={finalPnL >= 0 ? "#15803d" : "#b91c1c"}
+                    strokeWidth={1.5}
+                    fill="url(#pnlGrad)"
+                    name="P&L"
+                  />
+                </AreaChart>
+              </ResponsiveContainer>
+            )}
+          </div>
+
+          {/* 3. Sentiment history */}
+          <div className="chart-card">
+            <div className="chart-header">
+              <div>
+                <p className="chart-title">Sentiment per Signal</p>
+                <p className="chart-sub">AI score at time of each trade</p>
+              </div>
+            </div>
+            {sentimentSeries.length === 0 ? (
+              <div className="chart-empty"><p>No trade data yet</p></div>
+            ) : (
+              <ResponsiveContainer width="100%" height={180}>
+                <BarChart data={sentimentSeries} margin={{ top: 8, right: 16, left: 0, bottom: 0 }}>
+                  <CartesianGrid stroke="#f0f0ee" strokeDasharray="4 4" />
+                  <XAxis dataKey="label" tick={{ fontSize: 10, fill: "#bbb" }} />
+                  <YAxis domain={[-1, 1]} tick={{ fontSize: 10, fill: "#bbb" }} width={36} />
+                  <Tooltip content={<ChartTip />} />
+                  <Bar dataKey="score" name="Sentiment" radius={[2, 2, 0, 0]}>
+                    {sentimentSeries.map((entry, i) => (
+                      <Cell key={i} fill={entry.score >= 0.3 ? "#15803d" : entry.score <= -0.3 ? "#b91c1c" : "#aaa"} />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            )}
+          </div>
         </div>
       </div>
 

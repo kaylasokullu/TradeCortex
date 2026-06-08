@@ -127,6 +127,55 @@ async def update_config(body: dict):
     return current
 
 
+@app.get("/market-data")
+async def get_market_data():
+    """
+    Returns 90 days of daily price bars for the configured symbol.
+    Uses Alpaca's market data API — requires ALPACA_API_KEY and ALPACA_SECRET_KEY.
+    """
+    cfg = load_bot_config()
+    symbol = cfg.get("symbol", "GEV")
+
+    if not settings.ALPACA_API_KEY or not settings.ALPACA_SECRET_KEY:
+        return {"symbol": symbol, "bars": []}
+
+    try:
+        from alpaca.data import StockHistoricalDataClient
+        from alpaca.data.requests import StockBarsRequest
+        from alpaca.data.timeframe import TimeFrame
+        from datetime import datetime, timedelta, timezone
+
+        client = StockHistoricalDataClient(
+            api_key=settings.ALPACA_API_KEY,
+            secret_key=settings.ALPACA_SECRET_KEY,
+        )
+        request = StockBarsRequest(
+            symbol_or_symbols=symbol,
+            timeframe=TimeFrame.Day,
+            start=datetime.now(timezone.utc) - timedelta(days=90),
+        )
+        bars_response = client.get_stock_bars(request)
+        bar_list = bars_response.get(symbol, [])
+
+        return {
+            "symbol": symbol,
+            "bars": [
+                {
+                    "date": b.timestamp.strftime("%Y-%m-%d"),
+                    "open": round(float(b.open), 2),
+                    "high": round(float(b.high), 2),
+                    "low": round(float(b.low), 2),
+                    "close": round(float(b.close), 2),
+                    "volume": int(b.volume),
+                }
+                for b in bar_list
+            ],
+        }
+    except Exception as e:
+        logger.error(f"Market data fetch failed: {e}")
+        return {"symbol": symbol, "bars": []}
+
+
 @app.get("/docs")
 async def get_docs_list():
     """Returns all knowledge base entries."""
