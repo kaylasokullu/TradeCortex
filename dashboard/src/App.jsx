@@ -459,6 +459,228 @@ function SettingsPage({ config, onSave }) {
   );
 }
 
+// ── How It Works ─────────────────────────────────────────────────────────────
+function HowItWorksPage() {
+  const [open, setOpen] = useState(null);
+
+  const toggle = (i) => setOpen(open === i ? null : i);
+
+  const steps = [
+    {
+      n: "01",
+      title: "TradingView watches the stock",
+      body: "GE Vernova (ticker: GEV) is loaded on a live chart inside TradingView — a professional charting platform. A strategy called RSI(2) Pullback runs continuously on that chart, checking the price every time a new daily candle closes.",
+    },
+    {
+      n: "02",
+      title: "A buy or sell signal fires",
+      body: "When specific conditions are met (explained below), the strategy triggers an alert. A buy signal means "conditions look right to enter a position." A sell signal means "conditions suggest it's time to exit."",
+    },
+    {
+      n: "03",
+      title: "TradingView sends a message to the server",
+      body: "TradingView fires a webhook — a small JSON packet containing the action (buy or sell), the stock symbol, and the current price — to your server hosted on Railway. This happens in under a second.",
+    },
+    {
+      n: "04",
+      title: "Claude AI reads the latest news",
+      body: "The server asks Claude (Anthropic's AI) to search the web for the last 24 hours of news about GEV. Claude returns a sentiment score between −1.0 (very bad news) and +1.0 (very good news), plus a short summary of what it found.",
+    },
+    {
+      n: "05",
+      title: "The Brain decides whether to trade",
+      body: "If the chart says BUY but today's news is very negative (score below −0.6), the trade is skipped — bad news can override a technical signal. The same applies in reverse for sells. Otherwise the trade proceeds.",
+    },
+    {
+      n: "06",
+      title: "Alpaca places a paper trade",
+      body: "Alpaca is a brokerage that supports paper trading — simulated trades that use real market prices but zero real money. $500 of GEV is bought or sold in fractional shares. You can see every order in your Alpaca dashboard.",
+    },
+    {
+      n: "07",
+      title: "The dashboard updates",
+      body: "The trade is saved to a log file on the server. This dashboard fetches that log every 10 seconds and shows you every signal, its sentiment score, and the result — all without you needing to do anything.",
+    },
+  ];
+
+  const concepts = [
+    {
+      term: "Stock",
+      def: "A share of ownership in a company. When you buy a stock, you own a small piece of that business. If the company does well, the stock price rises and your investment is worth more.",
+    },
+    {
+      term: "Ticker Symbol",
+      def: "A short code that identifies a stock on an exchange. GEV is the ticker for GE Vernova. AAPL is Apple. TSLA is Tesla. These are used everywhere in trading software.",
+    },
+    {
+      term: "RSI — Relative Strength Index",
+      def: "A number between 0 and 100 that measures how fast a stock has been moving. A low RSI (e.g. below 10) means the stock dropped sharply very recently. A high RSI (e.g. above 90) means it surged sharply. Extremes in either direction often reverse.",
+    },
+    {
+      term: "RSI(2)",
+      def: "RSI calculated over just 2 days instead of the typical 14. This makes it extremely sensitive — it reacts to even a single bad day. The strategy uses this to spot very short-term pullbacks in an uptrending stock.",
+    },
+    {
+      term: "200-Day Moving Average (EMA)",
+      def: "The average closing price of a stock over the last 200 days, calculated with more weight on recent days. If the current price is above this line, the stock is generally considered to be in a long-term uptrend. The bot only buys when this condition is true — a safety filter.",
+    },
+    {
+      term: "Pullback",
+      def: "A temporary dip in price during an overall uptrend. Buying a pullback means buying the dip — entering when the stock has briefly moved lower, hoping it resumes its upward trend.",
+    },
+    {
+      term: "Paper Trading",
+      def: "Trading with simulated money using real market prices. No actual money is at risk. It's used to test whether a strategy works before committing real capital. All trades in TradeCortex are currently paper trades.",
+    },
+    {
+      term: "Webhook",
+      def: "An automatic message sent from one piece of software to another when something happens. TradingView uses webhooks to notify TradeCortex the moment a buy or sell signal fires — like a text message between applications.",
+    },
+    {
+      term: "Sentiment Score",
+      def: "A number from −1.0 to +1.0 representing the overall tone of recent news. Positive scores mean bullish (good) news. Negative scores mean bearish (bad) news. TradeCortex uses this as a second opinion before placing a trade.",
+    },
+    {
+      term: "Notional Value",
+      def: "The dollar amount invested per trade, regardless of how many shares that buys. Set to $500 by default. If GEV costs $380 per share, $500 buys 1.31 fractional shares automatically.",
+    },
+    {
+      term: "Fractional Shares",
+      def: "The ability to buy a partial share instead of a whole one. If a stock costs $1,000 but you only want to invest $500, you buy 0.5 shares. Alpaca supports this, which is why the bot can invest exactly $500 regardless of share price.",
+    },
+    {
+      term: "Win Rate",
+      def: "The percentage of closed trades that were profitable. A closed trade is a buy followed by a sell. If 7 out of 10 closed trades made money, the win rate is 70%. The dashboard calculates this automatically once sells start arriving.",
+    },
+  ];
+
+  const faqs = [
+    ["Is real money at risk?", "No. TradeCortex is locked to paper trading mode. Every order is simulated on Alpaca's paper account — real market prices, zero real money."],
+    ["Why GEV specifically?", "GE Vernova was selected because it's a high-growth energy infrastructure stock with good daily liquidity, strong narrative momentum (nuclear energy, AI power demand), and clean RSI behaviour that suits a pullback strategy."],
+    ["What is the RSI(2) Pullback strategy?", "It buys when GEV dips sharply (RSI drops below 10) while still above its 200-day moving average — betting that the dip is temporary. It sells when the stock bounces hard (RSI rises above 90). The idea is to buy weakness in an uptrend and sell into strength."],
+    ["What does the AI sentiment actually do?", "It acts as a news filter. Even if the chart says buy, if Claude finds very negative news (score below −0.6), the trade is skipped. It's an extra layer of protection against buying into a stock that's falling for a fundamental reason, not just a technical one."],
+    ["How often does it trade?", "RSI(2) is a short-term strategy — signals can fire several times a month on a volatile stock. But because of the 200 EMA filter and sentiment gate, many potential signals get filtered out. Expect a handful of trades per month."],
+    ["What does 'Simulated P&L' mean?", "It's what you would have made or lost if these had been real trades. Calculated by pairing each buy with the next sell: (sell price − buy price) × shares bought. It uses real market prices from the time the signals fired."],
+  ];
+
+  return (
+    <div className="page howto-page">
+      {/* Hero */}
+      <div className="howto-hero">
+        <p className="eyebrow">TRADECORTEX</p>
+        <h1 className="howto-headline">How It Works</h1>
+        <p className="howto-sub">
+          A complete guide to TradeCortex — what it does, how it makes decisions, and the trading concepts behind it. No prior experience needed.
+        </p>
+      </div>
+
+      <div className="rule" />
+
+      {/* What is TradeCortex */}
+      <div className="howto-section">
+        <p className="section-label">WHAT IS TRADECORTEX</p>
+        <div className="howto-summary-grid">
+          <div className="howto-summary-main">
+            <p className="howto-body-lg">
+              TradeCortex is an automated trading bot. It watches a single stock (GEV) on TradingView 24/7, uses a rule-based strategy to detect buy and sell opportunities, checks today's news sentiment using AI, and places simulated trades on Alpaca — all without any manual input.
+            </p>
+            <p className="howto-body">
+              You set it up once. After that it runs on its own, logs every decision it makes, and displays everything on this dashboard in real time.
+            </p>
+          </div>
+          <div className="howto-summary-aside">
+            <div className="aside-stat"><span className="aside-n">4</span><span className="aside-label">AI Agents</span></div>
+            <div className="aside-stat"><span className="aside-n">24/7</span><span className="aside-label">Autonomous</span></div>
+            <div className="aside-stat"><span className="aside-n">$0</span><span className="aside-label">Real Money at Risk</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div className="rule" />
+
+      {/* Step by step */}
+      <div className="howto-section">
+        <p className="section-label">STEP BY STEP</p>
+        <p className="howto-section-intro">What happens from the moment a signal fires to the moment it appears on this dashboard.</p>
+        <div className="steps-list">
+          {steps.map((s, i) => (
+            <div key={i} className="step-row">
+              <span className="step-n">{s.n}</span>
+              <div className="step-body">
+                <p className="step-title">{s.title}</p>
+                <p className="step-text">{s.body}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className="rule" />
+
+      {/* Buy / sell signals */}
+      <div className="howto-section">
+        <p className="section-label">WHEN SIGNALS FIRE</p>
+        <p className="howto-section-intro">The exact conditions that trigger a trade.</p>
+        <div className="signal-pair">
+          <div className="signal-box signal-box-buy">
+            <p className="signal-box-label">▲ BUY</p>
+            <ul className="signal-list">
+              <li>RSI(2) falls <strong>below 10</strong> — stock pulled back sharply</li>
+              <li>Price is <strong>above the 200-day EMA</strong> — long-term uptrend confirmed</li>
+              <li>No position currently open</li>
+              <li>AI sentiment is not strongly negative (score above −0.6)</li>
+            </ul>
+            <p className="signal-interp">Interpretation: the stock dipped hard inside an uptrend. Historically this bounces.</p>
+          </div>
+          <div className="signal-box signal-box-sell">
+            <p className="signal-box-label">▼ SELL</p>
+            <ul className="signal-list">
+              <li>RSI(2) rises <strong>above 90</strong> — stock bounced sharply</li>
+              <li>A position is currently open</li>
+              <li>AI sentiment is not strongly positive (score below +0.6)</li>
+            </ul>
+            <p className="signal-interp">Interpretation: the stock ran hard in the short term. Time to take profit before the move fades.</p>
+          </div>
+        </div>
+      </div>
+
+      <div className="rule" />
+
+      {/* Trading concepts */}
+      <div className="howto-section">
+        <p className="section-label">TRADING CONCEPTS</p>
+        <p className="howto-section-intro">Every term you'll encounter on this dashboard, explained plainly.</p>
+        <div className="concepts-grid">
+          {concepts.map((c) => (
+            <div key={c.term} className="concept-card">
+              <p className="concept-term">{c.term}</p>
+              <p className="concept-def">{c.def}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className="rule" />
+
+      {/* FAQ accordion */}
+      <div className="howto-section">
+        <p className="section-label">FREQUENTLY ASKED</p>
+        <div className="faq-list">
+          {faqs.map(([q, a], i) => (
+            <div key={i} className="faq-item">
+              <button className="faq-q" onClick={() => toggle(i)}>
+                <span>{q}</span>
+                <span className="faq-icon">{open === i ? "−" : "+"}</span>
+              </button>
+              {open === i && <p className="faq-a">{a}</p>}
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ── Root ──────────────────────────────────────────────────────────────────────
 export default function App() {
   const [page, setPage] = useState("Dashboard");
@@ -486,7 +708,7 @@ export default function App() {
     return () => clearInterval(iv);
   }, []);
 
-  const PAGES = ["Dashboard", "Knowledge Base", "Settings"];
+  const PAGES = ["Dashboard", "How It Works", "Knowledge Base", "Settings"];
 
   return (
     <div className="app">
@@ -509,6 +731,7 @@ export default function App() {
         {page === "Dashboard" && (
           <DashboardPage trades={trades} loading={loading} error={error} lastUpdated={lastUpdated} onRefresh={fetchTrades} />
         )}
+        {page === "How It Works" && <HowItWorksPage />}
         {page === "Knowledge Base" && <KnowledgeBasePage />}
         {page === "Settings" && <SettingsPage config={config} onSave={setConfig} />}
       </main>
