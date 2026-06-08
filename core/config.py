@@ -26,8 +26,8 @@ class Settings(BaseSettings):
     DRY_RUN: bool = True            # True = log only, no real orders
 
     # ── Notifications ─────────────────────────────────────────────────────────
-    # Slack webhook URL for the Notification Agent
-    SLACK_WEBHOOK_URL: str = ""
+    GMAIL_ADDRESS: str = ""       # Gmail address to send from and receive to
+    GMAIL_APP_PASSWORD: str = ""  # Gmail App Password (not your regular password)
 
     class Config:
         env_file = ".env"
