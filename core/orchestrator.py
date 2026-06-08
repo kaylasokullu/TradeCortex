@@ -60,11 +60,13 @@ class Orchestrator:
             return {"message": msg, "executed": False}
 
         # ── Step 2: Execute Order via Broker Agent ────────────────────────────
+        from core.bot_config import load_bot_config
+        bot_cfg = load_bot_config()
         order_result = await self.broker.execute(
             symbol=alert.symbol,
             action=alert.action,
-            notional=settings.ORDER_NOTIONAL,
-            dry_run=settings.DRY_RUN,
+            notional=bot_cfg.get("order_notional", settings.ORDER_NOTIONAL),
+            dry_run=bot_cfg.get("dry_run", settings.DRY_RUN),
         )
 
         # ── Step 3: Log to Reporting Agent ────────────────────────────────────

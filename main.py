@@ -17,6 +17,7 @@ import uvicorn
 from core.config import settings
 from core.models import TradingViewAlert, WebhookResponse
 from core.orchestrator import Orchestrator
+from core.bot_config import load_bot_config, save_bot_config
 
 # ── Logging ──────────────────────────────────────────────────────────────────
 logging.basicConfig(
@@ -96,6 +97,33 @@ async def get_trades():
     if not trades_path.exists():
         return []
     return json.loads(trades_path.read_text())
+
+
+@app.get("/config")
+async def get_config():
+    """Returns current bot configuration (symbol, order size, dry run)."""
+    return load_bot_config()
+
+
+@app.post("/config")
+async def update_config(body: dict):
+    """
+    Update bot configuration live — no redeploy needed.
+    Accepted fields: symbol (str), order_notional (float), dry_run (bool)
+    """
+    current = load_bot_config()
+    if "symbol" in body:
+        current["symbol"] = str(body["symbol"]).upper().strip()
+    if "order_notional" in body:
+        val = float(body["order_notional"])
+        if val <= 0:
+            raise HTTPException(status_code=400, detail="order_notional must be > 0")
+        current["order_notional"] = val
+    if "dry_run" in body:
+        current["dry_run"] = bool(body["dry_run"])
+    save_bot_config(current)
+    logger.info(f"⚙️ Config updated: {current}")
+    return current
 
 
 @app.post("/webhook", response_model=WebhookResponse)

@@ -32,10 +32,15 @@ class TradingViewAlert(BaseModel):
 
     @field_validator("symbol")
     @classmethod
-    def symbol_must_be_gev(cls, v):
-        """Safety guard — only process GEV signals during development."""
-        if v.upper() != "GEV":
-            raise ValueError(f"Unexpected symbol: {v}. Only GEV is configured.")
+    def symbol_must_match_config(cls, v):
+        """Safety guard — only process signals for the configured symbol."""
+        from core.bot_config import load_bot_config
+        configured = load_bot_config().get("symbol", "GEV")
+        if v.upper() != configured.upper():
+            raise ValueError(
+                f"Bot is configured for {configured}, received {v}. "
+                "Update Settings in the dashboard or change SYMBOL in Railway."
+            )
         return v.upper()
 
     @field_validator("price")
