@@ -144,8 +144,8 @@ The 200 EMA filter prevents buying into a downtrend. The sentiment gate prevents
 
 | Component | Platform | Auto-deploy |
 |---|---|---|
-| Backend (FastAPI) | Railway | ✅ On every push to main |
-| Frontend (React) | Vercel | ✅ On every push to main |
+| Backend (FastAPI) | Railway | On every push to main |
+| Frontend (React) | Vercel | On every push to main |
 | Trade log | Railway Volume (`/data/trades.json`) | Persistent across redeploys |
 
 ---
