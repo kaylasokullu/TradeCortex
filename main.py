@@ -127,6 +127,14 @@ async def update_config(body: dict):
     return current
 
 
+@app.post("/test-email")
+async def test_email(request: Request):
+    """Fire a test email to confirm Gmail is wired up correctly."""
+    orchestrator: Orchestrator = request.app.state.orchestrator
+    await orchestrator.notification.send("✅ TradeCortex test email — notifications are working!")
+    return {"status": "sent — check Railway logs for result"}
+
+
 @app.get("/market-data")
 async def get_market_data():
     """
