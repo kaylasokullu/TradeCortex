@@ -142,5 +142,21 @@
     "order_id": "dry-run-no-order",
     "notional": 500.0,
     "success": true
+  },
+  {
+    "id": "trade_20260606_045538",
+    "timestamp": "2026-06-06T04:55:38.988608+00:00",
+    "symbol": "GEV",
+    "action": "buy",
+    "price": 380.0,
+    "strategy": "RSI2_Pullback",
+    "timeframe": "D",
+    "sentiment_score": -0.2,
+    "sentiment_label": "neutral",
+    "sentiment_summary": "GEV sentiment is mixed near-term: positive India wind contract and strong YTD performance are offset by insider selling, a Vineyard Wind legal setback, valuation premium concerns, and analyst caution on capex and wind headwinds.",
+    "order_status": "accepted",
+    "order_id": "1655d4b2-9937-4a41-9c16-0a897f13ff0f",
+    "notional": 500.0,
+    "success": true
   }
 ]
