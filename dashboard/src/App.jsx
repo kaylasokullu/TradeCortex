@@ -548,7 +548,6 @@ function KnowledgeBasePage() {
 
 // ── Settings ──────────────────────────────────────────────────────────────────
 function SettingsPage({ config, onSave }) {
-  const [symbol, setSymbol] = useState(config?.symbol || "GEV");
   const [notional, setNotional] = useState(config?.order_notional || 500);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -560,7 +559,7 @@ function SettingsPage({ config, onSave }) {
       const res = await fetch(`${API_URL}/config`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ symbol: symbol.toUpperCase().trim(), order_notional: parseFloat(notional), dry_run: true }),
+        body: JSON.stringify({ order_notional: parseFloat(notional), dry_run: true }),
       });
       if (!res.ok) throw new Error(`${res.status}`);
       const updated = await res.json();
@@ -581,7 +580,7 @@ function SettingsPage({ config, onSave }) {
       </div>
 
       <p className="settings-intro">
-        Change the stock symbol or order size. All trades run in paper (simulated) mode — no real money involved.
+        Adjust the dollar amount per trade. The bot trades GEV in paper (simulated) mode — no real money involved.
       </p>
 
       <div className="rule" />
@@ -590,24 +589,6 @@ function SettingsPage({ config, onSave }) {
       {saved && <div className="alert-bar alert-ok">✓ Settings saved. Takes effect on the next trade signal.</div>}
 
       <div className="settings-form">
-        <div className="setting-row">
-          <div className="setting-info">
-            <p className="setting-label">Stock Symbol</p>
-            <p className="setting-desc">
-              The ticker the bot watches. After changing this, update your TradingView chart to the same stock.
-            </p>
-          </div>
-          <input
-            className="setting-input"
-            value={symbol}
-            onChange={(e) => setSymbol(e.target.value.toUpperCase())}
-            placeholder="GEV"
-            maxLength={6}
-          />
-        </div>
-
-        <div className="rule-light" />
-
         <div className="setting-row">
           <div className="setting-info">
             <p className="setting-label">Dollar Amount Per Trade</p>
@@ -631,6 +612,18 @@ function SettingsPage({ config, onSave }) {
 
         <div className="setting-row">
           <div className="setting-info">
+            <p className="setting-label">Stock</p>
+            <p className="setting-desc">
+              The bot is configured to trade GE Vernova (GEV) using the RSI(2) Pullback strategy.
+            </p>
+          </div>
+          <span className="setting-badge">GEV</span>
+        </div>
+
+        <div className="rule-light" />
+
+        <div className="setting-row">
+          <div className="setting-info">
             <p className="setting-label">Trading Mode</p>
             <p className="setting-desc">
               Paper trading is permanently enabled. All trades simulate real market prices with no real money.
@@ -643,17 +636,6 @@ function SettingsPage({ config, onSave }) {
       <button className="primary-btn" onClick={handleSave} disabled={saving}>
         {saving ? "Saving…" : "Save Changes"}
       </button>
-
-      <div className="rule" style={{ marginTop: 48 }} />
-
-      <div className="info-block">
-        <p className="info-block-title">How to change the stock</p>
-        <ol className="info-list">
-          <li>Enter the new ticker above (e.g. <code>NVDA</code>) and click Save.</li>
-          <li>Open TradingView, load the same ticker on a chart, and re-apply the Pine Script strategy.</li>
-          <li>Create a new alert pointing your Railway webhook URL. The bot will now accept signals for the new symbol.</li>
-        </ol>
-      </div>
     </div>
   );
 }
