@@ -18,6 +18,7 @@ from core.config import settings
 from core.models import TradingViewAlert, WebhookResponse
 from core.orchestrator import Orchestrator
 from core.bot_config import load_bot_config, save_bot_config
+from core.docs_store import load_docs, add_doc, remove_doc
 
 # ── Logging ──────────────────────────────────────────────────────────────────
 logging.basicConfig(
@@ -124,6 +125,35 @@ async def update_config(body: dict):
     save_bot_config(current)
     logger.info(f"⚙️ Config updated: {current}")
     return current
+
+
+@app.get("/docs")
+async def get_docs_list():
+    """Returns all knowledge base entries."""
+    return list(reversed(load_docs()))
+
+
+@app.post("/docs")
+async def create_doc(body: dict):
+    """
+    Create a new knowledge base entry.
+    Required: title (str), content (str)
+    Optional: category (str) — defaults to "General"
+    """
+    title = str(body.get("title", "")).strip()
+    content = str(body.get("content", "")).strip()
+    category = str(body.get("category", "General")).strip()
+    if not title or not content:
+        raise HTTPException(status_code=400, detail="title and content are required")
+    return add_doc(title, content, category)
+
+
+@app.delete("/docs/{doc_id}")
+async def delete_doc(doc_id: str):
+    """Delete a knowledge base entry by ID."""
+    if not remove_doc(doc_id):
+        raise HTTPException(status_code=404, detail="Doc not found")
+    return {"deleted": doc_id}
 
 
 @app.post("/webhook", response_model=WebhookResponse)
