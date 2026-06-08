@@ -307,6 +307,43 @@ body {
   color: #666;
 }
 
+/* ── Trade Log header ────────────────────────────────────────────────────── */
+.trade-log-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  margin-bottom: 16px;
+  gap: 16px;
+}
+
+.trade-log-title {
+  font-size: 28px;
+  font-weight: 800;
+  color: #111;
+  letter-spacing: -0.8px;
+  line-height: 1.1;
+  margin-bottom: 6px;
+}
+
+.trade-log-sub {
+  font-size: 13px;
+  color: #aaa;
+  font-weight: 400;
+  max-width: 480px;
+  line-height: 1.5;
+}
+
+.trade-log-count {
+  font-size: 12px;
+  font-weight: 700;
+  color: #888;
+  background: #f5f5f3;
+  padding: 5px 12px;
+  letter-spacing: 0.3px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
 /* ── Table ───────────────────────────────────────────────────────────────── */
 .table-scroll {
   border: 1px solid #e8e8e6;

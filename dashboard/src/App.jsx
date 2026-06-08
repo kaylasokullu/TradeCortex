@@ -316,7 +316,16 @@ function DashboardPage({ trades, loading, error, lastUpdated, onRefresh }) {
       </div>
 
       {/* Trade log */}
-      <p className="section-label">TRADE LOG</p>
+      <div className="trade-log-header">
+        <div>
+          <p className="section-label">COMPLETE RECORD</p>
+          <h2 className="trade-log-title">Trade Log</h2>
+          <p className="trade-log-sub">Every signal the bot has ever received — buy, sell, skipped, simulated. Nothing is deleted.</p>
+        </div>
+        {trades.length > 0 && (
+          <span className="trade-log-count">{trades.length} entries</span>
+        )}
+      </div>
 
       {loading ? (
         <div className="state-box"><div className="spinner" /></div>
