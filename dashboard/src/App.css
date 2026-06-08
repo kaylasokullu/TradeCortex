@@ -33,10 +33,10 @@ body {
 .header-left { display: flex; align-items: center; gap: 12px; }
 
 .logo {
-  font-size: 14px;
-  font-weight: 700;
+  font-size: 15px;
+  font-weight: 800;
   color: #111;
-  letter-spacing: -0.2px;
+  letter-spacing: -0.3px;
 }
 
 .header-chip {
@@ -58,11 +58,11 @@ body {
   background: none;
   border: none;
   font-size: 12px;
-  font-weight: 500;
+  font-weight: 700;
   color: #999;
   padding: 6px 16px;
   cursor: pointer;
-  letter-spacing: 0.3px;
+  letter-spacing: 0.5px;
   transition: color 0.12s;
   text-transform: uppercase;
 }
@@ -71,7 +71,7 @@ body {
 
 .nav-active {
   color: #111 !important;
-  border-bottom: 1.5px solid #111;
+  border-bottom: 2px solid #111;
 }
 
 /* ── Footer ──────────────────────────────────────────────────────────────── */
@@ -108,8 +108,8 @@ body {
 }
 
 .page-title {
-  font-size: 36px;
-  font-weight: 300;
+  font-size: 38px;
+  font-weight: 700;
   color: #111;
   letter-spacing: -1px;
   line-height: 1.1;
@@ -198,8 +198,8 @@ body {
 }
 
 .chart-title {
-  font-size: 12px;
-  font-weight: 700;
+  font-size: 13px;
+  font-weight: 800;
   color: #111;
   margin-bottom: 3px;
 }
@@ -276,34 +276,35 @@ body {
 
 .dark-panel {
   background: #0a0a0a;
-  padding: 28px 28px 24px;
+  padding: 32px 32px 28px;
 }
 
-.dark-panel-lg { padding: 32px 32px 26px; }
+.dark-panel-lg { padding: 36px 36px 30px; }
 
 .dp-label {
-  font-size: 10px;
-  font-weight: 600;
-  color: #555;
-  letter-spacing: 1.5px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #888;
+  letter-spacing: 1.8px;
   text-transform: uppercase;
-  margin-bottom: 14px;
+  margin-bottom: 16px;
 }
 
 .dp-value {
-  font-size: 42px;
+  font-size: 52px;
   font-weight: 800;
   color: #fff;
   letter-spacing: -2px;
   line-height: 1;
-  margin-bottom: 10px;
+  margin-bottom: 12px;
 }
 
-.dark-panel-lg .dp-value { font-size: 52px; }
+.dark-panel-lg .dp-value { font-size: 64px; }
 
 .dp-sub {
-  font-size: 12px;
-  color: #555;
+  font-size: 13px;
+  font-weight: 500;
+  color: #666;
 }
 
 /* ── Table ───────────────────────────────────────────────────────────────── */
@@ -321,8 +322,8 @@ th {
   padding: 10px 16px;
   text-align: left;
   font-size: 10px;
-  font-weight: 700;
-  color: #aaa;
+  font-weight: 800;
+  color: #777;
   text-transform: uppercase;
   letter-spacing: 1px;
   white-space: nowrap;
@@ -512,7 +513,7 @@ tr:hover td { background: #fafaf8; }
 
 .doc-read-title {
   font-size: 30px;
-  font-weight: 300;
+  font-weight: 700;
   color: #111;
   letter-spacing: -0.8px;
   line-height: 1.2;
@@ -611,7 +612,7 @@ tr:hover td { background: #fafaf8; }
 
 .howto-headline {
   font-size: 52px;
-  font-weight: 300;
+  font-weight: 700;
   letter-spacing: -2px;
   color: #111;
   line-height: 1.05;
@@ -855,4 +856,96 @@ tr:hover td { background: #fafaf8; }
   font-size: 13px;
   color: #555;
   line-height: 1.7;
+}
+
+/* ── Responsive / Mobile ─────────────────────────────────────────────────── */
+
+/* Tablet (≤768px): compress header padding & nav link spacing */
+@media (max-width: 768px) {
+  .header {
+    padding: 0 24px;
+  }
+  .nav-link {
+    padding: 6px 10px;
+    font-size: 11px;
+  }
+  .footer {
+    padding: 16px 24px;
+  }
+}
+
+/* Phone (≤520px): stack logo + nav vertically, scrollable nav row */
+@media (max-width: 520px) {
+  .header {
+    flex-direction: column;
+    align-items: stretch;
+    height: auto;
+    padding: 0;
+  }
+  .header-left {
+    padding: 12px 20px 10px;
+  }
+  .nav {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;          /* Firefox */
+    border-top: 1px solid #f0f0ee;
+  }
+  .nav::-webkit-scrollbar { display: none; }
+  .nav-link {
+    padding: 10px 16px;
+    font-size: 11px;
+    white-space: nowrap;
+  }
+
+  /* Main content padding */
+  .main {
+    padding: 20px 16px;
+  }
+
+  /* Smaller page title */
+  .page-title {
+    font-size: 26px;
+    letter-spacing: -0.5px;
+  }
+
+  /* Page top — stack title + controls vertically */
+  .page-top {
+    flex-direction: column;
+    align-items: flex-start;
+    margin-bottom: 28px;
+  }
+
+  /* Howto big headline */
+  .howto-headline {
+    font-size: 32px;
+    letter-spacing: -1px;
+  }
+
+  /* Settings rows — stack label + input */
+  .setting-row {
+    flex-direction: column;
+    gap: 12px;
+  }
+  .setting-input {
+    width: 100%;
+  }
+  .prefix-wrap {
+    width: 100%;
+  }
+
+  /* Footer — stack left/right lines */
+  .footer {
+    flex-direction: column;
+    gap: 6px;
+    padding: 14px 20px;
+  }
+
+  /* Dark panel value — shrink on very small screens */
+  .dp-value {
+    font-size: 40px;
+  }
+  .dark-panel-lg .dp-value {
+    font-size: 48px;
+  }
 }
