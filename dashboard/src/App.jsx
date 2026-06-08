@@ -474,7 +474,7 @@ function HowItWorksPage() {
     {
       n: "02",
       title: "A buy or sell signal fires",
-      body: "When specific conditions are met (explained below), the strategy triggers an alert. A buy signal means "conditions look right to enter a position." A sell signal means "conditions suggest it's time to exit."",
+      body: "When specific conditions are met (explained below), the strategy triggers an alert. A buy signal means 'conditions look right to enter a position.' A sell signal means 'conditions suggest it is time to exit.'",
     },
     {
       n: "03",
