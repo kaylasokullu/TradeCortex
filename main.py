@@ -30,10 +30,10 @@ logger = logging.getLogger("webhook")
 # ── App lifecycle ─────────────────────────────────────────────────────────────
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    logger.info("🚀 GEV Trading Bot starting up...")
+    logger.info("GEV Trading Bot starting up...")
     app.state.orchestrator = Orchestrator()
     yield
-    logger.info("🛑 Shutting down...")
+    logger.info("Shutting down...")
 
 app = FastAPI(
     title="GEV Trading Bot",
@@ -78,7 +78,7 @@ async def verify_webhook(request: Request) -> dict:
     # Validate secret
     secret = body.get("secret", "")
     if not hmac.compare_digest(secret, settings.WEBHOOK_SECRET):
-        logger.warning("❌ Invalid webhook secret received")
+        logger.warning("Invalid webhook secret received")
         raise HTTPException(status_code=401, detail="Invalid secret")
 
     return body
@@ -123,7 +123,7 @@ async def update_config(body: dict):
     if "dry_run" in body:
         current["dry_run"] = bool(body["dry_run"])
     save_bot_config(current)
-    logger.info(f"⚙️ Config updated: {current}")
+    logger.info(f" Config updated: {current}")
     return current
 
 
@@ -131,7 +131,7 @@ async def update_config(body: dict):
 async def test_email(request: Request):
     """Fire a test email to confirm Gmail is wired up correctly."""
     orchestrator: Orchestrator = request.app.state.orchestrator
-    await orchestrator.notification.send("✅ TradeCortex test email — notifications are working!")
+    await orchestrator.notification.send("TradeCortex test email — notifications are working!")
     return {"status": "sent — check Railway logs for result"}
 
 
@@ -171,7 +171,7 @@ async def get_market_data():
         except (KeyError, TypeError):
             bar_list = []
 
-        logger.info(f"📈 Market data: {len(bar_list)} bars for {symbol}")
+        logger.info(f"Market data: {len(bar_list)} bars for {symbol}")
         return {
             "symbol": symbol,
             "bars": [
@@ -246,7 +246,7 @@ async def receive_alert(
         logger.error(f"Failed to parse alert payload: {e}")
         raise HTTPException(status_code=422, detail=f"Invalid payload: {e}")
 
-    logger.info(f"📨 Alert received → {alert.action.upper()} {alert.symbol} @ ${alert.price}")
+    logger.info(f"Alert received → {alert.action.upper()} {alert.symbol} @ ${alert.price}")
 
     # Hand off to the orchestrator (non-blocking)
     orchestrator: Orchestrator = request.app.state.orchestrator
