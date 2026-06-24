@@ -63,19 +63,25 @@ class SentimentAgent:
                 if response.stop_reason == "end_turn":
                     return self._parse(result_text, symbol)
 
-                # If Claude wants to use a tool, feed results back and continue
+                # Claude wants to use web_search — it's server-side, Anthropic executes it.
+                # We append the assistant turn (which includes the search results as
+                # tool_result blocks) then loop so Claude can synthesize the final answer.
                 if response.stop_reason == "tool_use":
                     messages.append({"role": "assistant", "content": response.content})
+                    # Build tool_result entries so the conversation is valid.
+                    # For server-side web_search the actual results are already in
+                    # response.content as server_tool_result blocks; we just need
+                    # placeholder entries for any tool_use blocks Claude emitted.
                     tool_results = []
                     for block in response.content:
                         if block.type == "tool_use":
-                            # web_search is executed server-side; result is in the next response
                             tool_results.append({
                                 "type": "tool_result",
                                 "tool_use_id": block.id,
-                                "content": "Search executed.",
+                                "content": "",
                             })
-                    messages.append({"role": "user", "content": tool_results})
+                    if tool_results:
+                        messages.append({"role": "user", "content": tool_results})
                     continue
 
                 # Any other stop reason — use whatever text we have

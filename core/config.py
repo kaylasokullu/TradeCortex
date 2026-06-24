@@ -26,8 +26,8 @@ class Settings(BaseSettings):
     DRY_RUN: bool = True            # True = log only, no real orders
 
     # ── Notifications ─────────────────────────────────────────────────────────
-    GMAIL_ADDRESS: str = ""       # Gmail address to send from and receive to
-    GMAIL_APP_PASSWORD: str = ""  # Gmail App Password (not your regular password)
+    GMAIL_ADDRESS: str = ""       # Email address to receive trade alerts
+    RESEND_API_KEY: str = ""      # From resend.com — used to send emails via HTTP
 
     class Config:
         env_file = ".env"
