@@ -34,7 +34,7 @@ class NotificationAgent:
                         "Content-Type": "application/json",
                     },
                     json={
-                        "from": "TradeCortex <onboarding@resend.dev>",
+                        "from": "onboarding@resend.dev",
                         "to": [self.to_email],
                         "subject": "TradeCortex Alert — Trade Signal",
                         "text": message,
