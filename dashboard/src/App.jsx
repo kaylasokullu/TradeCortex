@@ -20,8 +20,10 @@ const sentColor = (s) => {
 function calcPnL(trades) {
   const sorted = [...trades].sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
   const closed = [];
-  const q = [];
+  const queues = {};
   for (const t of sorted) {
+    if (!queues[t.symbol]) queues[t.symbol] = [];
+    const q = queues[t.symbol];
     if (t.action === "buy") q.push(t);
     else if (t.action === "sell" && q.length > 0) {
       const b = q.shift();
@@ -37,9 +39,11 @@ function calcPnL(trades) {
 function buildPnLSeries(trades) {
   const sorted = [...trades].sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
   const series = [{ label: "Start", pnl: 0 }];
-  const q = [];
+  const queues = {};
   let cum = 0;
   for (const t of sorted) {
+    if (!queues[t.symbol]) queues[t.symbol] = [];
+    const q = queues[t.symbol];
     if (t.action === "buy") { q.push(t); }
     else if (t.action === "sell" && q.length > 0) {
       const b = q.shift();
@@ -558,6 +562,7 @@ function KnowledgeBasePage() {
 // ── Settings ──────────────────────────────────────────────────────────────────
 function SettingsPage({ config, onSave }) {
   const [notional, setNotional] = useState(config?.order_notional || 500);
+  const [dryRun, setDryRun] = useState(config?.dry_run ?? true);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [err, setErr] = useState(null);
@@ -568,7 +573,7 @@ function SettingsPage({ config, onSave }) {
       const res = await fetch(`${API_URL}/config`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ order_notional: parseFloat(notional), dry_run: true }),
+        body: JSON.stringify({ order_notional: parseFloat(notional), dry_run: dryRun }),
       });
       if (!res.ok) throw new Error(`${res.status}`);
       const updated = await res.json();
@@ -627,6 +632,26 @@ function SettingsPage({ config, onSave }) {
             </p>
           </div>
           <span className="setting-badge">GEV</span>
+        </div>
+
+        <div className="rule-light" />
+
+        <div className="setting-row">
+          <div className="setting-info">
+            <p className="setting-label">Order Execution</p>
+            <p className="setting-desc">
+              {dryRun
+                ? "Dry run — signals are logged and scored, but no order is sent to Alpaca."
+                : "Live — each signal places a real paper order on your Alpaca account (simulated money, real market prices)."}
+            </p>
+          </div>
+          <button
+            type="button"
+            className={`toggle-btn ${dryRun ? "toggle-btn-off" : "toggle-btn-on"}`}
+            onClick={() => setDryRun((v) => !v)}
+          >
+            {dryRun ? "🧪 Dry Run" : "🟢 Live Orders"}
+          </button>
         </div>
 
         <div className="rule-light" />

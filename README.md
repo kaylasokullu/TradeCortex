@@ -114,12 +114,12 @@ curl -X POST http://localhost:8000/test-email
 
 ```bash
 # Trigger a test trade
-curl -X POST https://web-production-c4c98.up.railway.app/webhook \
+curl -X POST https://web-prod-tradecortex.up.railway.app/webhook \
   -H "Content-Type: application/json" \
   -d '{"secret":"change-me-in-production","action":"buy","symbol":"GEV","price":380.00}'
 
 # Test email
-curl -X POST https://web-production-c4c98.up.railway.app/test-email
+curl -X POST https://web-prod-tradecortex.up.railway.app/test-email
 ```
 
 ---

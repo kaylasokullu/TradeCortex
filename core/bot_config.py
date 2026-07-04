@@ -8,6 +8,8 @@ import logging
 import os
 from pathlib import Path
 
+from core.config import settings
+
 logger = logging.getLogger("bot_config")
 
 
@@ -16,23 +18,27 @@ def _config_path() -> Path:
     return trade_log.parent / "bot_config.json"
 
 
-DEFAULT_CONFIG = {
-    "symbol": "GEV",
-    "order_notional": 500.0,
-    "dry_run": True,
-}
+def _defaults() -> dict:
+    """Defaults sourced from env settings (Railway vars), not hardcoded —
+    so DRY_RUN etc. actually takes effect until a value is explicitly saved via /config."""
+    return {
+        "symbol": settings.SYMBOL,
+        "order_notional": settings.ORDER_NOTIONAL,
+        "dry_run": settings.DRY_RUN,
+    }
 
 
 def load_bot_config() -> dict:
-    """Read config from file; fall back to defaults if missing or corrupt."""
+    """Read config from file; fall back to env-based defaults if missing or corrupt."""
     path = _config_path()
+    defaults = _defaults()
     try:
         if path.exists():
             stored = json.loads(path.read_text())
-            return {**DEFAULT_CONFIG, **stored}
+            return {**defaults, **stored}
     except Exception as e:
         logger.warning(f"Could not read bot_config.json: {e}")
-    return DEFAULT_CONFIG.copy()
+    return defaults
 
 
 def save_bot_config(config: dict) -> None:

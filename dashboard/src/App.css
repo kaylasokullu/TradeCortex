@@ -624,6 +624,21 @@ tr:hover td { background: #fafaf8; }
   flex-shrink: 0;
 }
 
+.toggle-btn {
+  font-size: 12px;
+  font-weight: 600;
+  font-family: inherit;
+  padding: 8px 16px;
+  border-radius: 4px;
+  border: 1px solid transparent;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: opacity 0.12s;
+}
+.toggle-btn:hover { opacity: 0.85; }
+.toggle-btn-off { background: #f5f5f3; color: #555; border-color: #ddd; }
+.toggle-btn-on { background: #ecfdf5; color: #15803d; border-color: #86efac; }
+
 .info-block {
   max-width: 640px;
   background: #fafaf8;
