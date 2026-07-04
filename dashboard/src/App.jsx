@@ -91,7 +91,7 @@ function ChartTip({ active, payload, label, prefix = "", suffix = "" }) {
 }
 
 // ── Dashboard ─────────────────────────────────────────────────────────────────
-function DashboardPage({ trades, loading, error, lastUpdated, onRefresh }) {
+function DashboardPage({ trades, loading, error, lastUpdated, refreshing, onRefresh }) {
   const [mkt, setMkt] = useState({ bars: [], symbol: "" });
   const [mktLoading, setMktLoading] = useState(true);
 
@@ -138,7 +138,9 @@ function DashboardPage({ trades, loading, error, lastUpdated, onRefresh }) {
         </div>
         <div className="page-top-right">
           {lastUpdated && <span className="meta-text">Updated {lastUpdated}</span>}
-          <button className="ghost-btn" onClick={onRefresh}>↻ Refresh</button>
+          <button className="ghost-btn" onClick={onRefresh} disabled={refreshing}>
+            <span className={`refresh-icon${refreshing ? " spinning" : ""}`}>↻</span> Refresh
+          </button>
         </div>
       </div>
 
@@ -901,6 +903,7 @@ export default function App() {
   const [page, setPage] = useState("Dashboard");
   const [trades, setTrades] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState(null);
   const [lastUpdated, setLastUpdated] = useState(null);
   const [config, setConfig] = useState(null);
@@ -914,6 +917,12 @@ export default function App() {
       setError(null);
     } catch { setError("Cannot reach the backend."); }
     setLoading(false);
+  };
+
+  const handleManualRefresh = async () => {
+    setRefreshing(true);
+    await fetchTrades();
+    setRefreshing(false);
   };
 
   useEffect(() => {
@@ -944,7 +953,7 @@ export default function App() {
 
       <main className="main">
         {page === "Dashboard" && (
-          <DashboardPage trades={trades} loading={loading} error={error} lastUpdated={lastUpdated} onRefresh={fetchTrades} />
+          <DashboardPage trades={trades} loading={loading} error={error} lastUpdated={lastUpdated} refreshing={refreshing} onRefresh={handleManualRefresh} />
         )}
         {page === "How It Works" && <HowItWorksPage />}
         {page === "Knowledge Base" && <KnowledgeBasePage />}

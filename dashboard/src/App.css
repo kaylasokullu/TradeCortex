@@ -143,6 +143,11 @@ body {
   transition: all 0.12s;
 }
 .ghost-btn:hover { border-color: #111; color: #111; }
+.ghost-btn:disabled { cursor: not-allowed; opacity: 0.7; }
+
+.refresh-icon { display: inline-block; }
+.refresh-icon.spinning { animation: spin 0.7s linear infinite; }
+@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 
 .primary-btn {
   background: #111;
